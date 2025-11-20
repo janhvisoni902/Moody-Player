@@ -1,0 +1,16 @@
+ /* CSS Boilerplate */
+ * {
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
+ }
+ 
+ body,
+ #root{
+   font-family: 'Inter', Arial, sans-serif;
+   line-height: 1.5;
+   background-color: #0c0c0c;
+   color: #d01919;
+ }
+ 
+ 

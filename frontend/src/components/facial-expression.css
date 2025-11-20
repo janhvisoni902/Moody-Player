@@ -1,0 +1,46 @@
+.user-video-feed {
+    width: 20px;
+    aspect-ratio: 16 / 9;
+    border-radius: 12rem;
+    object-fit: cover;
+  }
+  .mood-element button{
+    padding:0.7rem 1rem;
+    border-radius: 0.5rem;
+    background-color: rgb(220, 217, 212);
+    color: rgb(203, 52, 10);
+  }
+  .mood-element {
+    position: relative;
+    width: 720px;
+    height: 560px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  canvas {
+    pointer-events: none;
+    z-index: 10;
+  }
+  
+  .user-video-feed {
+    z-index: 1;
+  }
+  .mood-element.happy {
+    background: rgba(255, 223, 0, 0.25); /* soft yellow */
+    transition: background 0.4s ease-in-out;
+  }
+  
+  .mood-element.sad {
+    background: rgba(0, 110, 255, 0.25); /* soft blue */
+    transition: background 0.4s ease-in-out;
+  }
+  
+  .mood-element.neutral {
+    background: rgba(200, 200, 200, 0.25); /* soft grey */
+    transition: background 0.4s ease-in-out;
+  }
+  
+    
+  
+  

@@ -1,0 +1,29 @@
+.mood-songs {
+    width: 100%;
+    padding: 3rem;
+    font-family: 'Times New Roman', Times, serif;
+  }
+  
+  .song-card {
+    display: flex;
+    justify-content: space-between;
+    background: #1e1e1e;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 10px;
+    color: #fff;
+  }
+  
+  .play-pause-button i {
+    margin-left: 10px;
+    opacity: 0.8;
+    transition: 0.2s;
+  }
+  
+  .play-pause-button i:hover {
+    opacity: 1;
+    transform: scale(1.2);
+    color: #fff500;
+  }
+  
+  
