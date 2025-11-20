@@ -3,6 +3,8 @@ import * as faceapi from 'face-api.js';
 import "./facial-expression.css";
 import axios from "axios";
 
+// const API = "http://localhost:3000"; 
+
 export default function FacialExpression({ setSongs }) {
   const videoRef = useRef();
   const canvasRef = useRef();
@@ -67,9 +69,11 @@ export default function FacialExpression({ setSongs }) {
     console.log("Mood detected:", finalMood);
     setMood(finalMood);
 
-    axios
-    .get(`https://moody-player-delta.vercel.app/songs?mood=${expression}`)
-      .then(res => {
+    axios.get(`${API}/songs?mood=${finalMood}`)
+
+  
+    axios.get(`https://moody-player-delta.vercel.app/songs?mood=${finalMood}`)
+    .then(res => {
         console.log("Fetched songs:", res.data.songs);
         setSongs(res.data.songs);
       })

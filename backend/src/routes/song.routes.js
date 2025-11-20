@@ -19,7 +19,8 @@ router.post('/songs',upload.single("audio"),async(req,res)=>{
     console.log(req.file);
     const fileData = await uploadFile(req.file)
 
-    const song = await songModel.create(
+
+    const song = songModel.create(
         {
             title:req.body.title,
             artist:req.body.artist,
@@ -33,22 +34,34 @@ router.post('/songs',upload.single("audio"),async(req,res)=>{
         message: 'song created successfully', 
         song: song,fileData
     })
+    const { mood } = req.query;
+
 })
 
-router.get('/songs',async(req,res)=>{
-    const {mood} = req.query;
-
-    const songs = await songModel.find({
-        mood: mood
-    })
-    res.status(200).json({
-        message:"songs fetched success",
+router.get('/songs', async (req, res) => {
+    try {
+      const queryMood = req.query.mood?.toLowerCase().trim();
+      console.log("Incoming Mood:", queryMood);
+  
+      const songs = await songModel.find({
+        mood: { $regex: new RegExp(`^${queryMood}$`, "i") }
+      });
+  
+      console.log("DB Songs Found:", songs.length);
+  
+      res.status(200).json({
+        message: "songs fetched success",
         songs
-    })
-
-
-})
-
+      });
+    } catch (err) {
+      console.error("Error Fetching Songs:", err);
+      res.status(500).json({
+        message: "Something went wrong",
+        reason: err.message
+      });
+    }
+  });
+  
 module.exports = router;
 // //ABHI ISS FILE MAI API TOH BANA DIYA BUT EXPRESS KO TOH YE SMJ
 // //HI NAI AATA KI KOI AISI API BANI HAI JISKE LIYE HUM USE KRTE HAI 
