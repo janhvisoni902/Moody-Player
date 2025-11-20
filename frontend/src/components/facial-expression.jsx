@@ -68,7 +68,7 @@ export default function FacialExpression({ setSongs }) {
     setMood(finalMood);
 
     axios
-      .get(`http://localhost:3000/songs?mood=${finalMood}`)
+    .get(`https://moody-player-delta.vercel.app/songs?mood=${expression}`)
       .then(res => {
         console.log("Fetched songs:", res.data.songs);
         setSongs(res.data.songs);
