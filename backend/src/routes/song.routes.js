@@ -39,28 +39,29 @@ router.post('/songs',upload.single("audio"),async(req,res)=>{
 })
 
 router.get('/songs', async (req, res) => {
-    try {
-      const queryMood = req.query.mood?.toLowerCase().trim();
-      console.log("Incoming Mood:", queryMood);
-  
-      const songs = await songModel.find({
-        mood: { $regex: new RegExp(`^${queryMood}$`, "i") }
-      });
-  
-      console.log("DB Songs Found:", songs.length);
-  
-      res.status(200).json({
-        message: "songs fetched success",
-        songs
-      });
-    } catch (err) {
-      console.error("Error Fetching Songs:", err);
-      res.status(500).json({
-        message: "Something went wrong",
-        reason: err.message
-      });
+  try {
+    const mood = req.query.mood?.toLowerCase();
+    
+    if (!mood) {
+      return res.status(400).json({ message: "Mood is required", songs: [] });
     }
-  });
+
+    const songs = await songModel.find({ mood });
+
+    console.log("DB Query Mood:", mood);
+    console.log("Songs Returned:", songs);
+
+    res.status(200).json({
+      message: "songs fetched success",
+      songs
+    });
+
+  } catch (error) {
+    console.error("Error fetching songs:", error);
+    res.status(500).json({ message: "Something went wrong", songs: [] });
+  }
+});
+
   
 module.exports = router;
 // //ABHI ISS FILE MAI API TOH BANA DIYA BUT EXPRESS KO TOH YE SMJ
