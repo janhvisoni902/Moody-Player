@@ -3,7 +3,6 @@ import * as faceapi from 'face-api.js';
 import "./facial-expression.css";
 import axios from "axios";
 
-// const API = "http://localhost:3000"; 
 
 export default function FacialExpression({ setSongs }) {
   const videoRef = useRef();
@@ -69,18 +68,25 @@ export default function FacialExpression({ setSongs }) {
     console.log("Mood detected:", finalMood);
     setMood(finalMood);
 
-    const API_BASE = "YOUR_BACKEND_URL_HERE";
-
-    axios.get(`/api/songs?mood=${finalMood}`)
-    
+    const API = import.meta.env.PROD
+    ? "https://your-vercel-backend-url.vercel.app"
+    : "http://localhost:3000";
   
-    axios.get(`https://moody-player-delta.vercel.app/songs?mood=${finalMood}`)
+    axios.get(`/api/songs?mood=${finalMood}`)
+  //   axios.get(`${API}/songs?mood=${finalMood}`)
+  // .then(res => setSongs(res.data.songs))
+  // .catch(err => console.error("Error fetching songs:", err));
+
+  
+    axios.get(`https://moody-player-lh7w.onrender.com/songs?mood=${finalMood}`)
     .then(res => {
         console.log("Fetched songs:", res.data.songs);
         setSongs(res.data.songs);
       })
       .catch(err => console.error("Error fetching songs:", err));
   };
+
+
 
   return (
     <div className='mood-element'>
