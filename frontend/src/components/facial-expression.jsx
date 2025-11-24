@@ -3,6 +3,11 @@ import * as faceapi from 'face-api.js';
 import "./facial-expression.css";
 import axios from "axios";
 
+// Auto-switch backend URL (Local ↔ Render)
+const API_BASE_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://moody-player-lh7w.onrender.com";
 
 export default function FacialExpression({ setSongs }) {
   const videoRef = useRef();
@@ -15,24 +20,25 @@ export default function FacialExpression({ setSongs }) {
       const MODEL_URL = '/models';
       await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
       await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
-      console.log("Models loaded");
+      console.log("✔ Face Models Loaded");
     };
     loadModels();
   }, []);
 
+  
   const toggleCamera = async () => {
     if (cameraOn) {
       const stream = videoRef.current.srcObject;
       if (stream) stream.getTracks().forEach(track => track.stop());
       videoRef.current.srcObject = null;
       setCameraOn(false);
-      console.log("📷 Camera turned off");
+      console.log("📷 Camera Off");
     } else {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         videoRef.current.srcObject = stream;
         setCameraOn(true);
-        console.log("📷 Camera turned on");
+        console.log("📷 Camera On");
       } catch (err) {
         console.error("Error accessing webcam:", err);
       }
@@ -65,27 +71,17 @@ export default function FacialExpression({ setSongs }) {
       ? expression
       : "neutral";
 
-    console.log("Mood detected:", finalMood);
     setMood(finalMood);
+    console.log("🎭 Mood detected:", finalMood);
 
-    const API = import.meta.env.PROD
-    ? "https://your-vercel-backend-url.vercel.app"
-    : "http://localhost:3000";
-  
-    axios.get(`/api/songs?mood=${finalMood}`)
-  //   axios.get(`${API}/songs?mood=${finalMood}`)
-  // .then(res => setSongs(res.data.songs))
-  // .catch(err => console.error("Error fetching songs:", err));
-
-  
-    axios.get(`https://moody-player-lh7w.onrender.com/songs?mood=${finalMood}`)
-    .then(res => {
-        console.log("Fetched songs:", res.data.songs);
-        setSongs(res.data.songs);
+    axios
+      .get(`${API_BASE_URL}/songs?mood=${finalMood}`)
+      .then((res) => {
+        console.log("🎶 Songs fetched:", res.data.songs);
+        setSongs(res.data.songs || []);
       })
-      .catch(err => console.error("Error fetching songs:", err));
+      .catch(err => console.error("Song fetch error:", err.message));
   };
-
 
 
   return (
@@ -120,7 +116,11 @@ export default function FacialExpression({ setSongs }) {
           Detect Mood
         </button>
 
-        {mood && <p className="mood-text">Current Mood: <strong>{mood}</strong></p>}
+        {mood && (
+          <p className="mood-text">
+            🎧 Current Mood: <strong>{mood}</strong>
+          </p>
+        )}
       </div>
     </div>
   );
