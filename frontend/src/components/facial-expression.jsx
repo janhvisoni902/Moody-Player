@@ -4,11 +4,9 @@ import "./facial-expression.css";
 import axios from "axios";
 
 // Auto-switch backend URL (local ↔ deployed)
-const API_BASE_URL =
-  window.location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : "https://moody-player-lh7w.onrender.com";
+const API_BASE_URL = "https://moody-player-lh7w.onrender.com";
 
+ 
 export default function FacialExpression({ setSongs }) {
   const videoRef = useRef();
   const canvasRef = useRef();
