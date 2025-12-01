@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
-import * as faceapi from 'face-api.js';
+import React, { useEffect, useRef, useState } from "react";
+import * as faceapi from "face-api.js";
 import "./facial-expression.css";
 import axios from "axios";
 
-// Auto-switch backend URL (Local ↔ Render)
+// Auto-switch backend URL (local ↔ deployed)
 const API_BASE_URL =
   window.location.hostname === "localhost"
     ? "http://localhost:3000"
@@ -17,116 +17,89 @@ export default function FacialExpression({ setSongs }) {
 
   useEffect(() => {
     const loadModels = async () => {
-      const MODEL_URL = '/models';
-      await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-      await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
-      console.log("✔ Face Models Loaded");
+      await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
+      await faceapi.nets.faceExpressionNet.loadFromUri("/models");
+      console.log("✔ Face Models loaded");
     };
     loadModels();
   }, []);
 
-  
   const toggleCamera = async () => {
     if (cameraOn) {
       const stream = videoRef.current.srcObject;
-      if (stream) stream.getTracks().forEach(track => track.stop());
+      if (stream) stream.getTracks().forEach((track) => track.stop());
       videoRef.current.srcObject = null;
       setCameraOn(false);
-      console.log("📷 Camera Off");
-    } else {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        videoRef.current.srcObject = stream;
-        setCameraOn(true);
-        console.log("📷 Camera On");
-      } catch (err) {
-        console.error("Error accessing webcam:", err);
-      }
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      videoRef.current.srcObject = stream;
+      setCameraOn(true);
+    } catch (err) {
+      console.error("Camera access error:", err);
     }
   };
 
   const detectMood = async () => {
-    if (!cameraOn) return alert("Please turn on the camera first!");
-  
+    if (!cameraOn) return alert("Turn on camera first!");
+
     const canvas = canvasRef.current;
     const video = videoRef.current;
-    const ctx = canvas.getContext("2d");
-  
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
+
     const detections = await faceapi
       .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
       .withFaceExpressions();
-  
+
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     if (detections.length === 0) {
       setMood("neutral");
       return;
     }
-  
-    let highest = 0;
-    let expression = "neutral";
-  
-    for (const [key, value] of Object.entries(detections[0].expressions)) {
-      if (value > highest) {
-        highest = value;
-        expression = key;
-      }
+
+    const expressions = detections[0].expressions;
+    const result = Object.keys(expressions).reduce((a, b) =>
+      expressions[a] > expressions[b] ? a : b
+    );
+
+    const finalMood = ["happy", "sad", "neutral"].includes(result)
+      ? result
+      : "neutral";
+
+    setMood(finalMood);
+    console.log("🎭 Mood detected:", finalMood);
+
+    try {
+      const res = await axios.get(`${API_BASE_URL}/songs?mood=${finalMood}`);
+      console.log("🎶 Songs fetched:", res.data.songs);
+      setSongs(res.data.songs || []);
+    } catch (err) {
+      console.error("Song Fetch Error:", err.message);
     }
-  
-    const finalMood = ["happy", "sad", "neutral"].includes(expression)
-      ? expression
-      : "neutral";
-  
-    setMood(finalMood);
-    console.log("🎭 Mood detected:", finalMood);
-  
-    axios
-      .get(`${API_BASE_URL}/songs?mood=${finalMood}`)
-      .then((res) => {
-        console.log("🎶 Songs fetched:", res.data.songs);
-        setSongs(res.data.songs || []);
-      })
-      .catch((err) => console.error("Song fetch error:", err.message));
   };
-  
-
-    const finalMood = ["happy", "sad", "neutral"].includes(expression)
-      ? expression
-      : "neutral";
-
-    setMood(finalMood);
-    console.log("🎭 Mood detected:", finalMood);
-
-    axios
-      .get(`${API_BASE_URL}/songs?mood=${finalMood}`)
-      .then((res) => {
-        console.log("🎶 Songs fetched:", res.data.songs);
-        setSongs(res.data.songs || []);
-      })
-      .catch(err => console.error("Song fetch error:", err.message));
-  };
-
 
   return (
-    <div className='mood-element'>
+    <div className="mood-element">
       <video
         ref={videoRef}
         autoPlay
         muted
-        crossOrigin="anonymous"
-        className='user-video-feed'
-        style={{ width: '720px', height: '560px', borderRadius: '10px' }}
+        className="user-video-feed"
+        style={{ width: "720px", height: "560px", borderRadius: "10px" }}
       />
 
       <canvas
         ref={canvasRef}
+        width={720}
+        height={560}
         style={{
-          position: 'absolute',
+          position: "absolute",
           top: 0,
           left: 0,
-          width: '720px',
-          height: '560px',
-          background: "transparent"
+          background: "transparent",
         }}
       />
 
@@ -147,4 +120,4 @@ export default function FacialExpression({ setSongs }) {
       </div>
     </div>
   );
-
+}
