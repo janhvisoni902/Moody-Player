@@ -47,25 +47,48 @@ export default function FacialExpression({ setSongs }) {
 
   const detectMood = async () => {
     if (!cameraOn) return alert("Please turn on the camera first!");
-
+  
+    const canvas = canvasRef.current;
+    const video = videoRef.current;
+    const ctx = canvas.getContext("2d");
+  
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
     const detections = await faceapi
-      .detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions())
+      .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
       .withFaceExpressions();
-
+  
     if (detections.length === 0) {
       setMood("neutral");
       return;
     }
-
+  
     let highest = 0;
-    let expression = 'neutral';
-
+    let expression = "neutral";
+  
     for (const [key, value] of Object.entries(detections[0].expressions)) {
       if (value > highest) {
         highest = value;
         expression = key;
       }
     }
+  
+    const finalMood = ["happy", "sad", "neutral"].includes(expression)
+      ? expression
+      : "neutral";
+  
+    setMood(finalMood);
+    console.log("🎭 Mood detected:", finalMood);
+  
+    axios
+      .get(`${API_BASE_URL}/songs?mood=${finalMood}`)
+      .then((res) => {
+        console.log("🎶 Songs fetched:", res.data.songs);
+        setSongs(res.data.songs || []);
+      })
+      .catch((err) => console.error("Song fetch error:", err.message));
+  };
+  
 
     const finalMood = ["happy", "sad", "neutral"].includes(expression)
       ? expression
@@ -124,4 +147,4 @@ export default function FacialExpression({ setSongs }) {
       </div>
     </div>
   );
-}
+
