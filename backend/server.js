@@ -6,16 +6,15 @@ connectDb();
 
 const cors = require("cors");
 
-app.use(
-  cors({
-    origin: [
-      "http://localhost:5173",
-      "https://melodious-pastelito-533ecd.netlify.app"
-    ],
-    methods: ["GET", "POST"],
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://melodious-pastelito-533ecd.netlify.app"
+  ],
+  methods: ["GET", "POST"],
+  credentials: true
+}));
+
 
 
 const PORT = process.env.PORT || 3000;
