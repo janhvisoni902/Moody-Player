@@ -3,9 +3,8 @@ import * as faceapi from "face-api.js";
 import "./facial-expression.css";
 import axios from "axios";
 
-// Correct backend URL for both production + localhost
-fetch(`https://moody-player-backend.onrender.com/songs?mood=${mood}`)
-
+// Correct backend URL
+const API_URL = "https://moody-player-backend.onrender.com";
 
 export default function FacialExpression({ setSongs }) {
   const videoRef = useRef();
@@ -13,6 +12,7 @@ export default function FacialExpression({ setSongs }) {
   const [cameraOn, setCameraOn] = useState(false);
   const [mood, setMood] = useState("");
 
+  // Load face detection models
   useEffect(() => {
     const loadModels = async () => {
       await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
@@ -22,6 +22,7 @@ export default function FacialExpression({ setSongs }) {
     loadModels();
   }, []);
 
+  // Camera toggle
   const toggleCamera = async () => {
     if (cameraOn) {
       const stream = videoRef.current.srcObject;
@@ -42,6 +43,7 @@ export default function FacialExpression({ setSongs }) {
     }
   };
 
+  // Mood detection + backend fetch
   const detectMood = async () => {
     if (!cameraOn) return alert("Please turn on the camera!");
 
@@ -61,6 +63,8 @@ export default function FacialExpression({ setSongs }) {
     }
 
     const expressions = detections[0].expressions;
+
+    // Pick the highest-confidence expression
     const detectedMood = Object.keys(expressions).reduce((a, b) =>
       expressions[a] > expressions[b] ? a : b
     );
@@ -72,8 +76,9 @@ export default function FacialExpression({ setSongs }) {
     setMood(finalMood);
     console.log("🎭 Mood:", finalMood);
 
+    // Fetch song list from backend
     try {
-      const res = await axios.get(`${API_BASE_URL}/songs?mood=${finalMood}`);
+      const res = await axios.get(`${API_URL}/songs?mood=${finalMood}`);
       console.log("🎶 Songs:", res.data.songs);
       setSongs(res.data.songs || []);
     } catch (err) {
@@ -107,6 +112,7 @@ export default function FacialExpression({ setSongs }) {
         <button onClick={toggleCamera} className="btn">
           {cameraOn ? "Turn Off Camera" : "Turn On Camera"}
         </button>
+
         <button onClick={detectMood} className="btn detect">
           Detect Mood
         </button>
