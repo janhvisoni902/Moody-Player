@@ -3,10 +3,12 @@ import * as faceapi from "face-api.js";
 import "./facial-expression.css";
 import axios from "axios";
 
-// Auto-switch backend URL (local ↔ deployed)
-const API_BASE_URL = "https://moody-player-lh7w.onrender.com";
+// Correct backend URL for both production + localhost
+const API_BASE_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://moody-player-lh7w.onrender.com";
 
- 
 export default function FacialExpression({ setSongs }) {
   const videoRef = useRef();
   const canvasRef = useRef();
@@ -17,7 +19,7 @@ export default function FacialExpression({ setSongs }) {
     const loadModels = async () => {
       await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
       await faceapi.nets.faceExpressionNet.loadFromUri("/models");
-      console.log("✔ Face Models loaded");
+      console.log("✔ Face Models Loaded");
     };
     loadModels();
   }, []);
@@ -28,6 +30,7 @@ export default function FacialExpression({ setSongs }) {
       if (stream) stream.getTracks().forEach((track) => track.stop());
       videoRef.current.srcObject = null;
       setCameraOn(false);
+      console.log("📷 Camera Off");
       return;
     }
 
@@ -35,23 +38,24 @@ export default function FacialExpression({ setSongs }) {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       videoRef.current.srcObject = stream;
       setCameraOn(true);
+      console.log("📷 Camera On");
     } catch (err) {
-      console.error("Camera access error:", err);
+      console.error("Camera Error:", err);
     }
   };
 
   const detectMood = async () => {
-    if (!cameraOn) return alert("Turn on camera first!");
+    if (!cameraOn) return alert("Please turn on the camera!");
 
-    const canvas = canvasRef.current;
     const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     const detections = await faceapi
       .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
       .withFaceExpressions();
-
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (detections.length === 0) {
       setMood("neutral");
@@ -59,23 +63,23 @@ export default function FacialExpression({ setSongs }) {
     }
 
     const expressions = detections[0].expressions;
-    const result = Object.keys(expressions).reduce((a, b) =>
+    const detectedMood = Object.keys(expressions).reduce((a, b) =>
       expressions[a] > expressions[b] ? a : b
     );
 
-    const finalMood = ["happy", "sad", "neutral"].includes(result)
-      ? result
+    const finalMood = ["happy", "sad", "neutral"].includes(detectedMood)
+      ? detectedMood
       : "neutral";
 
     setMood(finalMood);
-    console.log("🎭 Mood detected:", finalMood);
+    console.log("🎭 Mood:", finalMood);
 
     try {
       const res = await axios.get(`${API_BASE_URL}/songs?mood=${finalMood}`);
-      console.log("🎶 Songs fetched:", res.data.songs);
+      console.log("🎶 Songs:", res.data.songs);
       setSongs(res.data.songs || []);
     } catch (err) {
-      console.error("Song Fetch Error:", err.message);
+      console.error("❌ API Song Fetch Error:", err.message);
     }
   };
 
@@ -105,7 +109,6 @@ export default function FacialExpression({ setSongs }) {
         <button onClick={toggleCamera} className="btn">
           {cameraOn ? "Turn Off Camera" : "Turn On Camera"}
         </button>
-
         <button onClick={detectMood} className="btn detect">
           Detect Mood
         </button>
