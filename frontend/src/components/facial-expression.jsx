@@ -74,15 +74,15 @@ export default function FacialExpression({ setSongs }) {
       : "neutral";
 
     setMood(finalMood);
-    console.log("🎭 Mood:", finalMood);
+    console.log(" Mood:", finalMood);
 
     // Fetch song list from backend
     try {
       const res = await axios.get(`${API_URL}/songs?mood=${finalMood}`);
-      console.log("🎶 Songs:", res.data.songs);
+      console.log("Songs:", res.data.songs);
       setSongs(res.data.songs || []);
     } catch (err) {
-      console.error("❌ API Song Fetch Error:", err.message);
+      console.error(" API Song Fetch Error:", err.message);
     }
   };
 

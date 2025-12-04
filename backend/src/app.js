@@ -1,30 +1,38 @@
-// const express = require("express");
-// const multer = require('multer');
-// const songRoutes = require('./routes/song.routes');
-
-// const upload = multer({storage:multer.memoryStorage()});
-
-// const app = express();
-// app.use(express.json());
-
-// app.use('/', songRoutes)
-
-// module.exports = app;
 const express = require("express");
 const cors = require("cors");
 const songRoutes = require("./routes/song.routes");
 
 const app = express();
 
-app.use(cors());
+// ✅ Correct CORS allowed URLs
+const allowedOrigins = [
+  "https://poetic-eclair-256c76.netlify.app",
+  "http://localhost:5173"
+];
 
-// ⚠️ DO NOT use express.json() here before Multer routes
+// ✅ CORS middleware FIRST
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin) || !origin) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    }
+  })
+);
+
+// ⚠️ DO NOT add cors() again — REMOVE this line:
+// app.use(cors(corsOptions));
+
+app.use(express.json());
+
+// ✅ ROUTES must come AFTER CORS + json()
 app.use("/", songRoutes);
 
-
 app.get("/", (req, res) => {
-    res.send("✅ Backend running properly!");
-  });
-  
+  res.send("✅ Backend running properly!");
+});
 
 module.exports = app;
