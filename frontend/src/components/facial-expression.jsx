@@ -3,8 +3,8 @@ import * as faceapi from "face-api.js";
 import "./facial-expression.css";
 import axios from "axios";
 
-// Correct backend URL
-const API_URL = "https://moody-player-backend.onrender.com";
+// const API_URL = "http://https://moody-player-lh7w.onrender.comst:3000";
+const API_URL = "https://moody-player-lh7w.onrender.com"
 
 export default function FacialExpression({ setSongs }) {
   const videoRef = useRef();
