@@ -3,8 +3,8 @@ import * as faceapi from "face-api.js";
 import "./facial-expression.css";
 import axios from "axios";
 
-// const API_URL = "http://https://moody-player-lh7w.onrender.comst:3000";
-const API_URL = "https://moody-player-lh7w.onrender.com"
+// FINAL backend URL (Render backend)
+const API_URL = "https://moody-player-lh7w.onrender.com";
 
 export default function FacialExpression({ setSongs }) {
   const videoRef = useRef();
@@ -22,11 +22,11 @@ export default function FacialExpression({ setSongs }) {
     loadModels();
   }, []);
 
-  // Camera toggle
+  // Toggle Camera
   const toggleCamera = async () => {
     if (cameraOn) {
       const stream = videoRef.current.srcObject;
-      if (stream) stream.getTracks().forEach((track) => track.stop());
+      if (stream) stream.getTracks().forEach((t) => t.stop());
       videoRef.current.srcObject = null;
       setCameraOn(false);
       console.log("📷 Camera Off");
@@ -43,15 +43,12 @@ export default function FacialExpression({ setSongs }) {
     }
   };
 
-  // Mood detection + backend fetch
+  // Detect mood + Fetch songs
   const detectMood = async () => {
     if (!cameraOn) return alert("Please turn on the camera!");
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     const detections = await faceapi
       .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
@@ -64,7 +61,6 @@ export default function FacialExpression({ setSongs }) {
 
     const expressions = detections[0].expressions;
 
-    // Pick the highest-confidence expression
     const detectedMood = Object.keys(expressions).reduce((a, b) =>
       expressions[a] > expressions[b] ? a : b
     );
@@ -74,15 +70,15 @@ export default function FacialExpression({ setSongs }) {
       : "neutral";
 
     setMood(finalMood);
-    console.log(" Mood:", finalMood);
+    console.log("🎭 Mood:", finalMood);
 
-    // Fetch song list from backend
+    // Fetch music from backend
     try {
       const res = await axios.get(`${API_URL}/songs?mood=${finalMood}`);
-      console.log("Songs:", res.data.songs);
+      console.log("🎶 Songs fetched:", res.data.songs);
       setSongs(res.data.songs || []);
     } catch (err) {
-      console.error(" API Song Fetch Error:", err.message);
+      console.error("🔥 SONG FETCH ERROR:", err.message);
     }
   };
 
@@ -125,5 +121,4 @@ export default function FacialExpression({ setSongs }) {
       </div>
     </div>
   );
-}// force netlify rebuild
-
+}
