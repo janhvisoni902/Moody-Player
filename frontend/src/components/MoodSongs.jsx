@@ -1,54 +1,92 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./MoodSongs.css";
 
-const MoodSongs = ({ Songs }) => {
+const MoodSongs = ({ Songs, currentMood }) => {
   const audioRef = useRef(null);
+  const [playingId, setPlayingId] = useState(null);
 
   useEffect(() => {
     if (Songs.length > 0 && audioRef.current) {
       audioRef.current.src = Songs[0].audio;
-      audioRef.current.play().catch(() =>
+      audioRef.current.play().then(() => {
+        setPlayingId(Songs[0]._id || 0);
+      }).catch(() =>
         console.log("Autoplay blocked - user gesture required")
       );
+    } else {
+      setPlayingId(null);
     }
   }, [Songs]);
 
+  const handlePlay = (song, index) => {
+    const id = song._id || index;
+    if (playingId === id) {
+      audioRef.current.pause();
+      setPlayingId(null);
+    } else {
+      audioRef.current.src = song.audio;
+      audioRef.current.play();
+      setPlayingId(id);
+    }
+  };
+
+  const getMoodTitle = () => {
+    switch(currentMood) {
+      case 'happy': return 'Upbeat Tracks for You';
+      case 'sad': return 'Comforting Melodies';
+      default: return 'Recommended Songs';
+    }
+  };
 
   return (
-    <div className="mood-songs">
-      <h2>Recommended Songs</h2>
+    <div className="mood-songs-wrapper">
+      <div className="playlist-header">
+        <h2>{getMoodTitle()}</h2>
+        <span className="track-count">{Songs.length} Tracks</span>
+      </div>
 
-      {/* Main audio player */}
-      <audio ref={audioRef}  />
+      <audio ref={audioRef} onEnded={() => setPlayingId(null)} />
 
-      {/* Songs list */}
-      {Songs.map((song, index) => (
-        <div key={index} className="song-card">
-
-          <div className="title">
-            <h3>{song.title}</h3>
-            <p>{song.artist}</p>
+      <div className="songs-list">
+        {Songs.length === 0 ? (
+          <div className="empty-state">
+            <i className="ri-music-2-line"></i>
+            <p>Scan your mood to discover music</p>
           </div>
+        ) : (
+          Songs.map((song, index) => {
+            const id = song._id || index;
+            const isPlaying = playingId === id;
+            
+            return (
+              <div key={id} className={`song-card ${isPlaying ? 'playing' : ''}`}>
+                <div className="song-info">
+                  <div className="song-icon">
+                    {isPlaying ? (
+                      <div className="equalizer">
+                        <span></span><span></span><span></span>
+                      </div>
+                    ) : (
+                      <i className="ri-music-fill"></i>
+                    )}
+                  </div>
+                  <div className="title">
+                    <h3>{song.title}</h3>
+                    <p>{song.artist}</p>
+                  </div>
+                </div>
 
-          <div className="play-pause-button">
-            <i
-              className="ri-play-fill"
-              style={{ cursor: "pointer", fontSize: "24px" }}
-              onClick={() => {
-                audioRef.current.src = song.audio;
-                audioRef.current.play();
-              }}
-            ></i>
-
-            <i
-              className="ri-pause-line"
-              style={{ cursor: "pointer", fontSize: "24px" }}
-              onClick={() => audioRef.current.pause()}
-            ></i>
-          </div>
-
-        </div>
-      ))}
+                <button 
+                  className={`play-pause-btn ${isPlaying ? 'active' : ''}`}
+                  onClick={() => handlePlay(song, index)}
+                >
+                  <i className={isPlaying ? "ri-pause-fill" : "ri-play-fill"}></i>
+                </button>
+              </div>
+            );
+          })
+        )}
+      </div>
     </div>
   );
 };

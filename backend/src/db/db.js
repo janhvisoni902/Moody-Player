@@ -10,10 +10,7 @@ function connectDb() {
   }
 
   mongoose
-    .connect(mongoURI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    })
+    .connect(mongoURI)
     .then(() => console.log(" MongoDB Connected Successfully"))
     .catch((err) =>
       console.error(" MongoDB Connection Failed: ", err.message)

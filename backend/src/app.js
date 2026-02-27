@@ -1,21 +1,15 @@
-
 const express = require("express");
 const cors = require("cors");
 const songRoutes = require("./routes/song.routes");
 
 const app = express();
 
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // Allow common methods
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type'); // Allow common headers
-  next();
-});
-
-// Example for Node.js/Express with 'cors' package
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://melodious-pastelito-533ecd.netlify.app"
+  "http://localhost:3000",
+  "https://melodious-pastelito-533ecd.netlify.app",
+  "https://famous-llama-060d9c.netlify.app",
+  "https://moody-player-lh7w.onrender.com"
 ];
 
 app.use(
@@ -28,20 +22,9 @@ app.use(
       }
     },
     credentials: true,
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   })
 );
-
-
-
-// app.use(
-//   cors({
-//     origin: [
-//       "http://https://moody-player-lh7w.onrender.com"
-//     ],
-//     credentials: true
-//   })
-// );
 
 app.use(express.json());
 app.use("/", songRoutes);

@@ -1,16 +1,50 @@
- /* CSS Boilerplate */
- * {
-   margin: 0;
-   padding: 0;
-   box-sizing: border-box;
- }
- 
- body,
- #root{
-   font-family: 'Inter', Arial, sans-serif;
-   line-height: 1.5;
-   background-color: #0c0c0c;
-   color: #d01919;
- }
- 
- 
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap");
+
+:root {
+  /* Exact Colors from User Image */
+  --bg-color: #121921; /* Dark teal background */
+  --bg-color-surface: #1e252d; /* Lighter surface for cards */
+  --bg-color-nav: #121921;
+  --text-primary: #ffffff;
+  --text-secondary: #8c9baf;
+  
+  --accent-cyan: #00d6de; /* Cyan accent color */
+  --accent-cyan-glow: rgba(0, 214, 222, 0.4);
+  
+  --border-color: rgba(255, 255, 255, 0.05);
+  
+  /* Typography */
+  --font-heading: 'Poppins', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, #root {
+  font-family: var(--font-body);
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
